@@ -1,41 +1,7 @@
-'use client';
-
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination, EffectFade } from 'swiper/modules';
-
-import 'swiper/css';
-import 'swiper/css/pagination';
-import 'swiper/css/effect-fade';
-
-const slides = [
-  {
-    tag: 'DISCOVER YOUR NEXT STORY',
-    title: 'Every Book Opens a New World.',
-    description:
-      'Explore inspiring stories, gain knowledge, and find your next favorite book at BookNook.',
-    image:
-      'https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1400',
-  },
-  {
-    tag: 'READ • LEARN • GROW',
-    title: 'Knowledge Begins With Reading.',
-    description:
-      'Discover books that inspire your imagination and help you grow every day.',
-    image:
-      'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=1400',
-  },
-  {
-    tag: 'YOUR ONLINE LIBRARY',
-    title: 'Find the Book You Love.',
-    description:
-      'Browse a growing collection of books and borrow your next great read with ease.',
-    image:
-      'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=1400',
-  },
-];
+import HeroSlider from '@/components/HeroSlider';
+import Introduction from '@/components/Introduction';
 
 const books = [
   {
@@ -83,71 +49,10 @@ export default function Home() {
       <Navbar />
 
       {/* Hero Slider */}
-      <section className="bg-blue-950">
-        <Swiper
-          modules={[Autoplay, Pagination, EffectFade]}
-          effect="fade"
-          autoplay={{
-            delay: 4500,
-            disableOnInteraction: false,
-          }}
-          pagination={{ clickable: true }}
-          loop
-          className="hero-swiper"
-        >
-          {slides.map((slide, index) => (
-            <SwiperSlide key={index}>
-              <div
-                className="relative flex min-h-[540px] items-center bg-cover bg-center md:min-h-[620px]"
-                style={{
-                  backgroundImage: `url(${slide.image})`,
-                }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-950 via-blue-950/85 to-blue-950/20" />
-
-                <div className="relative mx-auto w-full max-w-7xl px-6 py-24 lg:px-8">
-                  <div className="max-w-2xl">
-                    <p className="mb-5 text-sm font-bold tracking-[0.25em] text-amber-400">
-                      {slide.tag}
-                    </p>
-
-                    <h1 className="mb-6 text-4xl font-extrabold leading-tight text-white md:text-6xl">
-                      {slide.title}
-                    </h1>
-
-                    <p className="mb-9 max-w-xl text-base leading-8 text-blue-100 md:text-lg">
-                      {slide.description}
-                    </p>
-
-                    <Link
-                      href="/books"
-                      className="inline-flex rounded-full bg-amber-400 px-8 py-3.5 font-bold text-blue-950 transition hover:bg-amber-300"
-                    >
-                      Browse Books →
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </section>
+      <HeroSlider />
 
       {/* Introduction */}
-      <section className="mx-auto max-w-7xl px-6 py-20 text-center">
-        <p className="mb-3 text-sm font-bold tracking-[0.2em] text-amber-600">
-          WELCOME TO BOOKNOOK
-        </p>
-
-        <h2 className="mb-5 text-3xl font-extrabold text-blue-950 md:text-4xl">
-          A Little Corner for Every Book Lover
-        </h2>
-
-        <p className="mx-auto max-w-2xl leading-8 text-slate-500">
-          Your reading journey starts here. Discover wonderful books, explore
-          new ideas, and make every page count with our online library.
-        </p>
-      </section>
+      <Introduction />
 
       {/* Featured Books */}
       <section className="bg-slate-50 px-6 py-20">
@@ -254,7 +159,7 @@ export default function Home() {
           <div>
             <div className="flex items-center gap-3">
               <img
-                src="/booknook.png"
+                src="/booknook.jpg"
                 alt="BookNook Logo"
                 className="h-10 w-10 object-contain"
               />

@@ -1,54 +1,154 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 
 export default function Navbar() {
+  const [isLoggedIn] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  const loggedOutLinks = [
+    { name: 'Home', href: '/' },
+    { name: 'All Books', href: '/books' },
+  ];
+
+  const loggedInLinks = [
+    { name: 'Home', href: '/' },
+    { name: 'All Books', href: '/books' },
+    { name: 'Add Book', href: '/add-book' },
+    { name: 'My Books', href: '/my-books' },
+    { name: 'My Borrows', href: '/my-borrows' },
+  ];
+
+  const links = isLoggedIn ? loggedInLinks : loggedOutLinks;
+
   return (
     <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/95 backdrop-blur">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
-        {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <img
-            src="/booknook.png"
+            src="/booknook.jpg"
             alt="BookNook Logo"
             className="h-10 w-10 object-contain"
           />
-
-          <span className="text-2xl font-extrabold tracking-tight text-blue-950">
+          <span className="text-2xl font-extrabold text-blue-950">
             BookNook<span className="text-amber-500">.</span>
           </span>
         </Link>
 
-        {/* Navigation Links */}
         <div className="hidden items-center gap-8 md:flex">
-          <Link
-            href="/"
-            className="font-semibold text-blue-900 transition hover:text-amber-600"
-          >
-            Home
-          </Link>
-
-          <Link
-            href="/books"
-            className="text-slate-600 transition hover:text-blue-900"
-          >
-            All Books
-          </Link>
-
-          <Link
-            href="/login"
-            className="text-slate-600 transition hover:text-blue-900"
-          >
-            Login
-          </Link>
+          {links.map(link => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="font-semibold text-slate-600 transition hover:text-amber-600"
+            >
+              {link.name}
+            </Link>
+          ))}
         </div>
 
-        {/* Get Started Button */}
-        <Link
-          href="/register"
-          className="rounded-full bg-blue-950 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800"
+        <div className="hidden items-center gap-3 md:flex">
+          {!isLoggedIn ? (
+            <>
+              <Link
+                href="/login"
+                className="rounded-full border border-blue-950 px-5 py-2 text-sm font-semibold text-blue-950 transition hover:bg-blue-50"
+              >
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className="rounded-full bg-blue-950 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-800"
+              >
+                Register
+              </Link>
+            </>
+          ) : (
+            <div className="relative">
+              <button
+                onClick={() => setProfileOpen(!profileOpen)}
+                className="flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2"
+              >
+                <img
+                  src="/booknook.jpg"
+                  alt="User"
+                  className="h-8 w-8 rounded-full object-cover"
+                />
+                <span className="font-semibold text-blue-950">User Name</span>
+              </button>
+
+              {profileOpen && (
+                <div className="absolute right-0 mt-3 w-48 rounded-xl border border-slate-100 bg-white p-2 shadow-lg">
+                  <Link
+                    href="/profile"
+                    className="block rounded-lg px-4 py-2 text-slate-700 hover:bg-slate-100"
+                  >
+                    My Profile
+                  </Link>
+                  <button className="w-full rounded-lg px-4 py-2 text-left text-red-600 hover:bg-red-50">
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="text-2xl text-blue-950 md:hidden"
+          aria-label="Toggle menu"
         >
-          Get Started
-        </Link>
+          {menuOpen ? '✕' : '☰'}
+        </button>
       </nav>
+
+      {menuOpen && (
+        <div className="border-t border-slate-100 bg-white px-5 py-5 md:hidden">
+          <div className="flex flex-col gap-4">
+            {links.map(link => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                className="font-semibold text-slate-700 hover:text-amber-600"
+              >
+                {link.name}
+              </Link>
+            ))}
+
+            {!isLoggedIn ? (
+              <>
+                <Link
+                  href="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="font-semibold text-blue-950"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setMenuOpen(false)}
+                  className="rounded-full bg-blue-950 px-5 py-2 text-center font-semibold text-white"
+                >
+                  Register
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/profile" onClick={() => setMenuOpen(false)}>
+                  My Profile
+                </Link>
+                <button className="text-left font-semibold text-red-600">
+                  Logout
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 }
