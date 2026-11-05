@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { authClient } from '@/lib/auth-client';
 
 export default function RegisterPage() {
@@ -21,15 +22,12 @@ export default function RegisterPage() {
     if (password.length < 6) {
       return 'Password must be at least 6 characters long.';
     }
-
     if (!/[A-Z]/.test(password)) {
       return 'Password must contain at least one uppercase letter.';
     }
-
     if (!/[a-z]/.test(password)) {
       return 'Password must contain at least one lowercase letter.';
     }
-
     return '';
   };
 
@@ -41,6 +39,7 @@ export default function RegisterPage() {
 
     if (validationError) {
       setError(validationError);
+      toast.error(validationError);
       return;
     }
 
@@ -56,13 +55,17 @@ export default function RegisterPage() {
       });
 
       if (error) {
-        setError(error.message || 'Registration failed. Please try again.');
+        const message = error.message || 'Registration failed.';
+        setError(message);
+        toast.error(message);
         return;
       }
 
+      toast.success('Registration successful! Please login.');
       router.push('/login');
     } catch {
       setError('Something went wrong. Please try again.');
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -73,18 +76,14 @@ export default function RegisterPage() {
     setGoogleLoading(true);
 
     try {
-      const { error } = await authClient.signIn.social({
+      await authClient.signIn.social({
         provider: 'google',
         callbackURL: '/',
       });
-
-      if (error) {
-        setError(error.message || 'Google sign up failed.');
-        setGoogleLoading(false);
-      }
     } catch {
-      setError('Google sign up failed. Please try again.');
       setGoogleLoading(false);
+      setError('Google sign up failed. Please try again.');
+      toast.error('Google sign up failed. Please try again.');
     }
   };
 
@@ -117,7 +116,7 @@ export default function RegisterPage() {
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="Enter your full name"
-              className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-amber-500"
+              className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-amber-500"
             />
           </div>
 
@@ -131,7 +130,7 @@ export default function RegisterPage() {
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="Enter your email"
-              className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-amber-500"
+              className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-amber-500"
             />
           </div>
 
@@ -144,7 +143,7 @@ export default function RegisterPage() {
               value={image}
               onChange={e => setImage(e.target.value)}
               placeholder="Paste your profile photo URL"
-              className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-amber-500"
+              className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-amber-500"
             />
           </div>
 
@@ -160,14 +159,14 @@ export default function RegisterPage() {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="Create a password"
-                className="w-full rounded-lg border border-slate-300 px-4 py-3 pr-12 outline-none transition focus:border-amber-500"
+                className="w-full rounded-lg border border-slate-300 px-4 py-3 pr-12 outline-none focus:border-amber-500"
               />
 
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-blue-950"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-blue-950"
               >
                 {showPassword ? (
                   <svg
@@ -254,7 +253,6 @@ export default function RegisterPage() {
               d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.72-6c-2.14 1.45-4.89 2.3-8.19 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
             />
           </svg>
-
           {googleLoading ? 'Connecting...' : 'Continue with Google'}
         </button>
 
