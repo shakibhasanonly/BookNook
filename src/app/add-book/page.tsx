@@ -22,6 +22,8 @@ export default function AddBookPage() {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error' | ''>('');
 
+  const addedDate = new Date().toISOString().split('T')[0];
+
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -63,6 +65,7 @@ export default function AddBookPage() {
         body: JSON.stringify({
           ...formData,
           totalCopies: Number(formData.totalCopies),
+          addedDate,
           userName: session.user.name,
           userEmail: session.user.email,
         }),
@@ -205,6 +208,16 @@ export default function AddBookPage() {
                 onChange={handleChange}
                 required
                 className="w-full rounded-lg border p-3"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block font-medium">Added Date</label>
+              <input
+                type="date"
+                value={addedDate}
+                readOnly
+                className="w-full rounded-lg border bg-gray-100 p-3 text-gray-600"
               />
             </div>
 
