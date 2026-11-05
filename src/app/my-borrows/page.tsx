@@ -35,6 +35,7 @@ export default function MyBorrows() {
     setTimeout(() => setToast(null), 3000);
   };
 
+  // Fetch Borrowed Books
   useEffect(() => {
     const fetchBorrows = async () => {
       if (isPending) return;
@@ -46,26 +47,43 @@ export default function MyBorrows() {
       }
 
       try {
+        setLoading(true);
+        setError('');
+
         const { data, error } = await authClient.token();
 
         if (error || !data?.token) {
           throw new Error('Authentication failed. Please login again.');
         }
 
-        const response = await fetch('http://localhost:5000/borrows', {
-          headers: {
-            Authorization: `Bearer ${data.token}`,
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/borrows`,
+          {
+            headers: {
+              Authorization: `Bearer ${data.token}`,
+            },
           },
-        });
+        );
+
+        const result = await response.json();
+
+        // Debugging: Show actual backend response
+        console.log('BORROWS STATUS:', response.status);
+        console.log('BORROWS RESPONSE:', result);
 
         if (!response.ok) {
-          throw new Error('Failed to load borrowed books');
+          throw new Error(result.message || 'Failed to load borrowed books');
         }
 
-        const result: Borrow[] = await response.json();
         setBorrows(result);
-      } catch {
-        setError('Borrowed books could not be loaded. Please try again.');
+      } catch (err) {
+        console.error('Fetch Borrows Error:', err);
+
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Borrowed books could not be loaded. Please try again.',
+        );
       } finally {
         setLoading(false);
       }
@@ -74,6 +92,7 @@ export default function MyBorrows() {
     fetchBorrows();
   }, [session, isPending]);
 
+  // Format Date
   const formatDate = (date: string) => {
     if (!date) return '—';
 
@@ -88,6 +107,7 @@ export default function MyBorrows() {
     });
   };
 
+  // Return Book
   const handleReturn = async (borrow: Borrow) => {
     setReturningId(borrow._id);
 
@@ -99,7 +119,7 @@ export default function MyBorrows() {
       }
 
       const response = await fetch(
-        `http://localhost:5000/borrows/${borrow._id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/borrows/${borrow._id}`,
         {
           method: 'DELETE',
           headers: {
@@ -108,15 +128,24 @@ export default function MyBorrows() {
         },
       );
 
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to return book');
+        throw new Error(result.message || 'Failed to return book');
       }
 
       setBorrows(prev => prev.filter(item => item._id !== borrow._id));
 
       showToast('Book returned successfully!', 'success');
-    } catch {
-      showToast('Failed to return book. Please try again.', 'error');
+    } catch (err) {
+      console.error('Return Book Error:', err);
+
+      showToast(
+        err instanceof Error
+          ? err.message
+          : 'Failed to return book. Please try again.',
+        'error',
+      );
     } finally {
       setReturningId(null);
     }
@@ -126,10 +155,11 @@ export default function MyBorrows() {
     <main className="flex min-h-screen flex-col bg-white text-slate-800">
       <Navbar />
 
+      {/* Toast Notification */}
       {toast && (
         <div
           role="status"
-          className={`fixed right-5 top-5 z-[100] rounded-lg px-6 py-4 text-sm font-semibold text-white shadow-lg ${
+          className={`fixed left-1/2 top-5 z-[100] -translate-x-1/2 rounded-lg px-6 py-4 text-sm font-semibold text-white shadow-lg ${
             toast.type === 'success' ? 'bg-emerald-700' : 'bg-red-600'
           }`}
         >
@@ -138,6 +168,7 @@ export default function MyBorrows() {
       )}
 
       <section className="mx-auto w-full max-w-6xl flex-1 px-4 py-12 sm:px-6">
+        {/* Page Heading */}
         <div className="mb-10">
           <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-emerald-700">
             Your Reading List
@@ -150,11 +181,13 @@ export default function MyBorrows() {
           </p>
         </div>
 
+        {/* Loading */}
         {isPending || loading ? (
           <p className="py-16 text-center text-slate-500">
             Loading borrowed books...
           </p>
         ) : !session?.user?.email ? (
+          /* Not Logged In */
           <div className="rounded-xl border border-slate-200 py-16 text-center">
             <p className="text-slate-600">
               Please login to view your borrowed books.
@@ -168,8 +201,19 @@ export default function MyBorrows() {
             </Link>
           </div>
         ) : error ? (
-          <p className="py-16 text-center text-red-500">{error}</p>
+          /* Error */
+          <div className="rounded-xl border border-red-200 bg-red-50 py-16 text-center">
+            <p className="text-red-600">{error}</p>
+
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-5 rounded-full bg-emerald-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
+            >
+              Try Again
+            </button>
+          </div>
         ) : borrows.length === 0 ? (
+          /* Empty State */
           <div className="rounded-xl border border-slate-200 py-16 text-center">
             <h2 className="text-xl font-semibold">No borrowed books yet</h2>
 
@@ -185,14 +229,18 @@ export default function MyBorrows() {
             </Link>
           </div>
         ) : (
+          /* Borrowed Books Table */
           <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[750px] text-left">
                 <thead className="bg-slate-50 text-sm text-slate-600">
                   <tr>
                     <th className="px-6 py-4 font-semibold">Book</th>
+
                     <th className="px-6 py-4 font-semibold">Borrow Date</th>
+
                     <th className="px-6 py-4 font-semibold">Return Date</th>
+
                     <th className="px-6 py-4 text-right font-semibold">
                       Action
                     </th>

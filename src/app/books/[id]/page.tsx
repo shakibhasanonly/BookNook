@@ -61,7 +61,9 @@ export default function BookDetails() {
 
     const fetchBook = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/books/${id}`);
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/books/${id}`,
+        );
 
         if (!response.ok) throw new Error('Book not found');
 
@@ -123,22 +125,25 @@ export default function BookDetails() {
         );
       }
 
-      const response = await fetch('http://localhost:5000/borrows', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${data.token}`,
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/borrows`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${data.token}`,
+          },
+          body: JSON.stringify({
+            bookId: book._id,
+            bookTitle: book.title,
+            bookImage: book.image,
+            userName: session.user.name || 'User',
+            userEmail: session.user.email,
+            borrowDate: borrowDate.toISOString(),
+            returnDate: returnDate.toISOString(),
+          }),
         },
-        body: JSON.stringify({
-          bookId: book._id,
-          bookTitle: book.title,
-          bookImage: book.image,
-          userName: session.user.name || 'User',
-          userEmail: session.user.email,
-          borrowDate: borrowDate.toISOString(),
-          returnDate: returnDate.toISOString(),
-        }),
-      });
+      );
 
       const result = await response.json();
 
@@ -190,7 +195,7 @@ export default function BookDetails() {
       {toast && (
         <div
           role="status"
-          className={`fixed right-5 top-5 z-[100] rounded-lg px-6 py-4 text-sm font-semibold text-white shadow-lg ${
+          className={`fixed left-1/2 top-5 z-[100] -translate-x-1/2 rounded-lg px-6 py-4 text-sm font-semibold text-white shadow-lg ${
             toast.type === 'success' ? 'bg-emerald-700' : 'bg-red-600'
           }`}
         >

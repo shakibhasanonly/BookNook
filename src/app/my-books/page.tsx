@@ -61,7 +61,9 @@ export default function MyBooks() {
       }
 
       try {
-        const response = await fetch('http://localhost:5000/books');
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/books`,
+        );
 
         if (!response.ok) {
           throw new Error('Failed to load books');
@@ -108,7 +110,7 @@ export default function MyBooks() {
       }
 
       const response = await fetch(
-        `http://localhost:5000/books/${editingBook._id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/books/${editingBook._id}`,
         {
           method: 'PATCH',
           headers: {
@@ -160,7 +162,7 @@ export default function MyBooks() {
       }
 
       const response = await fetch(
-        `http://localhost:5000/books/${deletingBook._id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/books/${deletingBook._id}`,
         {
           method: 'DELETE',
           headers: {
@@ -191,7 +193,7 @@ export default function MyBooks() {
       {toast && (
         <div
           role="status"
-          className={`fixed right-5 top-5 z-[100] rounded-lg px-6 py-4 text-sm font-semibold text-white shadow-lg ${
+          className={`fixed left-1/2 top-5 z-[100] -translate-x-1/2 rounded-lg px-6 py-4 text-sm font-semibold text-white shadow-lg ${
             toast.type === 'success' ? 'bg-emerald-700' : 'bg-red-600'
           }`}
         >
