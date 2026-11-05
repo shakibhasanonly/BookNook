@@ -46,18 +46,24 @@ export default function MyBorrows() {
       }
 
       try {
-        const response = await fetch(
-          `http://localhost:5000/borrows?email=${encodeURIComponent(
-            session.user.email,
-          )}`,
-        );
+        const { data, error } = await authClient.token();
+
+        if (error || !data?.token) {
+          throw new Error('Authentication failed. Please login again.');
+        }
+
+        const response = await fetch('http://localhost:5000/borrows', {
+          headers: {
+            Authorization: `Bearer ${data.token}`,
+          },
+        });
 
         if (!response.ok) {
           throw new Error('Failed to load borrowed books');
         }
 
-        const data: Borrow[] = await response.json();
-        setBorrows(data);
+        const result: Borrow[] = await response.json();
+        setBorrows(result);
       } catch {
         setError('Borrowed books could not be loaded. Please try again.');
       } finally {
@@ -86,9 +92,20 @@ export default function MyBorrows() {
     setReturningId(borrow._id);
 
     try {
+      const { data, error } = await authClient.token();
+
+      if (error || !data?.token) {
+        throw new Error('Authentication failed. Please login again.');
+      }
+
       const response = await fetch(
         `http://localhost:5000/borrows/${borrow._id}`,
-        { method: 'DELETE' },
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${data.token}`,
+          },
+        },
       );
 
       if (!response.ok) {

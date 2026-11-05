@@ -101,11 +101,20 @@ export default function MyBooks() {
     setSaving(true);
 
     try {
+      const { data, error } = await authClient.token();
+
+      if (error || !data?.token) {
+        throw new Error('Authentication failed. Please login again.');
+      }
+
       const response = await fetch(
         `http://localhost:5000/books/${editingBook._id}`,
         {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${data.token}`,
+          },
           body: JSON.stringify({
             ...formData,
             totalCopies: Number(formData.totalCopies),
@@ -113,7 +122,9 @@ export default function MyBooks() {
         },
       );
 
-      if (!response.ok) throw new Error('Update failed');
+      if (!response.ok) {
+        throw new Error('Update failed');
+      }
 
       setBooks(prev =>
         prev.map(book =>
@@ -142,12 +153,25 @@ export default function MyBooks() {
     setDeleting(true);
 
     try {
+      const { data, error } = await authClient.token();
+
+      if (error || !data?.token) {
+        throw new Error('Authentication failed. Please login again.');
+      }
+
       const response = await fetch(
         `http://localhost:5000/books/${deletingBook._id}`,
-        { method: 'DELETE' },
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${data.token}`,
+          },
+        },
       );
 
-      if (!response.ok) throw new Error('Delete failed');
+      if (!response.ok) {
+        throw new Error('Delete failed');
+      }
 
       setBooks(prev => prev.filter(book => book._id !== deletingBook._id));
 

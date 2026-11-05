@@ -88,10 +88,20 @@ export default function BookDetails() {
     returnDate.setDate(returnDate.getDate() + 7);
 
     try {
+      // Get JWT token from Better Auth
+      const { data, error } = await authClient.token();
+
+      if (error || !data?.token) {
+        throw new Error(
+          'Authentication token could not be retrieved. Please login again.',
+        );
+      }
+
       const response = await fetch('http://localhost:5000/borrows', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${data.token}`,
         },
         body: JSON.stringify({
           bookId: book._id,
@@ -104,10 +114,10 @@ export default function BookDetails() {
         }),
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to borrow book.');
+        throw new Error(result.message || 'Failed to borrow book.');
       }
 
       setBook(prev =>
@@ -291,7 +301,7 @@ export default function BookDetails() {
                 </label>
                 <input
                   value={new Date(
-                    Date.now() + 7 * 24 * 60 * 60 * 1000,
+                    new Date().setDate(new Date().getDate() + 7),
                   ).toLocaleDateString()}
                   readOnly
                   className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none"

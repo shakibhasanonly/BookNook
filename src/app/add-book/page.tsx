@@ -19,9 +19,13 @@ export default function AddBookPage() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState<'success' | 'error' | ''>('');
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     setFormData({
       ...formData,
@@ -33,17 +37,28 @@ export default function AddBookPage() {
     e.preventDefault();
 
     if (!session?.user) {
-      alert('Please login first!');
+      setMessage('Please login first!');
+      setMessageType('error');
       return;
     }
 
     setLoading(true);
+    setMessage('');
 
     try {
+      const { data, error } = await authClient.token();
+
+      if (error || !data?.token) {
+        throw new Error(
+          'Unable to get authentication token. Please login again.',
+        );
+      }
+
       const response = await fetch('http://localhost:5000/books', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${data.token}`,
         },
         body: JSON.stringify({
           ...formData,
@@ -59,11 +74,18 @@ export default function AddBookPage() {
         throw new Error(result.message || 'Failed to add book');
       }
 
-      alert('Book added successfully!');
-      router.push('/books');
-      router.refresh();
+      setMessageType('success');
+      setMessage('Book added successfully!');
+
+      setTimeout(() => {
+        router.push('/books');
+        router.refresh();
+      }, 1000);
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Something went wrong!');
+      setMessageType('error');
+      setMessage(
+        error instanceof Error ? error.message : 'Something went wrong!',
+      );
     } finally {
       setLoading(false);
     }
@@ -90,6 +112,19 @@ export default function AddBookPage() {
           <p className="mb-8 text-center text-gray-500">
             Share a new book with the BookNook community.
           </p>
+
+          {message && (
+            <div
+              role="alert"
+              className={`mb-5 rounded-lg p-3 text-center ${
+                messageType === 'success'
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-red-100 text-red-700'
+              }`}
+            >
+              {message}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
@@ -118,14 +153,20 @@ export default function AddBookPage() {
 
             <div>
               <label className="mb-2 block font-medium">Category</label>
-              <input
+              <select
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
                 required
-                className="w-full rounded-lg border p-3"
-                placeholder="Enter category"
-              />
+                className="w-full rounded-lg border bg-white p-3"
+              >
+                <option value="">Select a category</option>
+                <option value="Fiction">Fiction</option>
+                <option value="Science">Science</option>
+                <option value="History">History</option>
+                <option value="Kids">Kids</option>
+                <option value="Others">Others</option>
+              </select>
             </div>
 
             <div>
@@ -169,9 +210,7 @@ export default function AddBookPage() {
 
             <div className="rounded-lg bg-gray-100 p-4">
               <p className="mb-2 font-semibold">Added By</p>
-
               <p className="text-sm text-gray-700">Name: {session.user.name}</p>
-
               <p className="text-sm text-gray-700">
                 Email: {session.user.email}
               </p>
