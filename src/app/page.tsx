@@ -1,49 +1,47 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import HeroSlider from '@/components/HeroSlider';
 import Introduction from '@/components/Introduction';
 import Footer from '@/components/Footer';
 
-const books = [
-  {
-    title: 'The Great Gatsby',
-    author: 'F. Scott Fitzgerald',
-    category: 'Fiction',
-    image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=600',
-  },
-  {
-    title: 'Atomic Habits',
-    author: 'James Clear',
-    category: 'Others',
-    image: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=600',
-  },
-  {
-    title: 'A Brief History of Time',
-    author: 'Stephen Hawking',
-    category: 'Science',
-    image: 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?w=600',
-  },
-  {
-    title: 'The Alchemist',
-    author: 'Paulo Coelho',
-    category: 'Fiction',
-    image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600',
-  },
-  {
-    title: 'Sapiens',
-    author: 'Yuval Noah Harari',
-    category: 'History',
-    image: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=600',
-  },
-  {
-    title: 'Wonder',
-    author: 'R. J. Palacio',
-    category: 'Kids',
-    image: 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?w=600',
-  },
-];
+interface Book {
+  _id: string;
+  title: string;
+  author: string;
+  category: string;
+  image: string;
+}
 
 export default function Home() {
+  const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchLatestBooks = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/books?limit=6');
+
+        if (!response.ok) {
+          throw new Error('Failed to load books');
+        }
+
+        const data = await response.json();
+
+        setBooks(Array.isArray(data) ? data : data.books || []);
+      } catch {
+        setError('Books could not be loaded. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLatestBooks();
+  }, []);
+
   return (
     <main className="min-h-screen bg-white text-slate-800">
       {/* Navbar */}
@@ -55,7 +53,7 @@ export default function Home() {
       {/* Introduction */}
       <Introduction />
 
-      {/* Featured Books */}
+      {/* New Arrivals */}
       <section className="bg-slate-50 px-6 py-20">
         <div className="mx-auto max-w-7xl">
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
@@ -65,8 +63,12 @@ export default function Home() {
               </p>
 
               <h2 className="text-3xl font-extrabold text-blue-950 md:text-4xl">
-                Featured Books
+                New Arrivals
               </h2>
+
+              <p className="mt-2 text-slate-500">
+                Discover the latest additions to our library.
+              </p>
             </div>
 
             <Link
@@ -77,42 +79,74 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
-            {books.map(book => (
-              <article
-                key={book.title}
-                className="group overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="flex h-64 items-center justify-center overflow-hidden bg-slate-100">
-                  <img
-                    src={book.image}
-                    alt={book.title}
-                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                  />
-                </div>
+          {/* Loading */}
+          {loading && (
+            <div className="flex justify-center py-20">
+              <div className="h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-blue-950" />
+            </div>
+          )}
 
-                <div className="p-6">
-                  <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
-                    {book.category}
-                  </span>
+          {/* Error */}
+          {!loading && error && (
+            <p className="py-16 text-center text-red-500">{error}</p>
+          )}
 
-                  <h3 className="mt-4 text-xl font-bold text-blue-950">
-                    {book.title}
-                  </h3>
+          {/* Empty State */}
+          {!loading && !error && books.length === 0 && (
+            <p className="py-16 text-center text-slate-500">
+              No books have been added yet.
+            </p>
+          )}
 
-                  <p className="mt-2 text-sm text-slate-500">
-                    By {book.author}
-                  </p>
+          {/* Book Cards */}
+          {!loading && !error && books.length > 0 && (
+            <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+              {books.slice(0, 6).map(book => (
+                <article
+                  key={book._id}
+                  className="group overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+                >
+                  <div className="flex h-64 items-center justify-center overflow-hidden bg-slate-100">
+                    <img
+                      src={book.image}
+                      alt={book.title}
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                    />
+                  </div>
 
-                  <Link
-                    href="/books"
-                    className="mt-5 inline-block font-bold text-blue-900 hover:text-amber-600"
-                  >
-                    Explore Book →
-                  </Link>
-                </div>
-              </article>
-            ))}
+                  <div className="p-6">
+                    <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
+                      {book.category}
+                    </span>
+
+                    <h3 className="mt-4 text-xl font-bold text-blue-950">
+                      {book.title}
+                    </h3>
+
+                    <p className="mt-2 text-sm text-slate-500">
+                      By {book.author}
+                    </p>
+
+                    <Link
+                      href={`/books/${book._id}`}
+                      className="mt-5 inline-block font-bold text-blue-900 hover:text-amber-600"
+                    >
+                      View Details →
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+
+          {/* See All Books */}
+          <div className="mt-12 text-center">
+            <Link
+              href="/books"
+              className="inline-block rounded-full bg-blue-950 px-8 py-3 font-bold text-white transition hover:bg-blue-800"
+            >
+              See All Books
+            </Link>
           </div>
         </div>
       </section>
