@@ -43,7 +43,22 @@ export default function BookDetails() {
     setTimeout(() => setToast(null), 3000);
   };
 
+  // Protect Book Details Route
   useEffect(() => {
+    if (isPending) return;
+
+    if (!session?.user?.email) {
+      router.replace('/login');
+      return;
+    }
+  }, [isPending, session, router]);
+
+  // Fetch Book Only After Authentication
+  useEffect(() => {
+    if (isPending || !session?.user?.email || !id) return;
+
+    let cancelled = false;
+
     const fetchBook = async () => {
       try {
         const response = await fetch(`http://localhost:5000/books/${id}`);
@@ -51,22 +66,33 @@ export default function BookDetails() {
         if (!response.ok) throw new Error('Book not found');
 
         const data = await response.json();
-        setBook(data);
+
+        if (!cancelled) {
+          setBook(data);
+        }
       } catch {
-        setError('Book details could not be loaded.');
+        if (!cancelled) {
+          setError('Book details could not be loaded.');
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
-    if (id) fetchBook();
-  }, [id]);
+    fetchBook();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, isPending, session?.user?.email]);
 
   const handleBorrow = () => {
     if (isPending) return;
 
     if (!session?.user?.email) {
-      showToast('Please login to borrow a book.', 'error');
+      router.replace('/login');
       return;
     }
 
@@ -139,6 +165,23 @@ export default function BookDetails() {
       setBorrowing(false);
     }
   };
+
+  // Wait for authentication or redirect logged-out users
+  if (isPending || !session?.user?.email) {
+    return (
+      <main className="flex min-h-screen flex-col bg-white text-slate-800">
+        <Navbar />
+
+        <section className="flex flex-1 items-center justify-center px-6">
+          <p className="text-center text-slate-500">
+            {isPending ? 'Checking your login...' : 'Redirecting to login...'}
+          </p>
+        </section>
+
+        <Footer />
+      </main>
+    );
+  }
 
   return (
     <main className="flex min-h-screen flex-col bg-white text-slate-800">
