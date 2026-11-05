@@ -47,12 +47,12 @@ export default function Navbar() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
         <Link href="/" className="flex items-center gap-2">
           <img
-            src="/booknook.jpg"
+            src="/booknook.png"
             alt="BookNook Logo"
             className="h-10 w-10 object-contain"
           />
           <span className="text-2xl font-extrabold text-blue-950">
-            BookNook<span className="text-amber-500">.</span>
+            BookNook<span className="text-amber-500"></span>
           </span>
         </Link>
 
@@ -92,7 +92,7 @@ export default function Navbar() {
                   className="flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2"
                 >
                   <img
-                    src={session.user.image || '/booknook.jpg'}
+                    src={session.user.image || '/booknook.png'}
                     alt="User"
                     className="h-8 w-8 rounded-full object-cover"
                   />

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import HeroSlider from '@/components/HeroSlider';
 import Introduction from '@/components/Introduction';
+import Footer from '@/components/Footer';
 
 const books = [
   {
@@ -153,58 +154,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-blue-950 px-6 py-14 text-white">
-        <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-3">
-          <div>
-            <div className="flex items-center gap-3">
-              <img
-                src="/booknook.jpg"
-                alt="BookNook Logo"
-                className="h-10 w-10 object-contain"
-              />
-
-              <h2 className="text-2xl font-extrabold">
-                BookNook<span className="text-amber-400">.</span>
-              </h2>
-            </div>
-
-            <p className="mt-4 max-w-sm leading-7 text-blue-200">
-              Your online reading corner. Discover books, explore knowledge, and
-              enjoy the joy of reading.
-            </p>
-          </div>
-
-          <div>
-            <h3 className="mb-4 font-bold text-amber-400">Quick Links</h3>
-
-            <div className="flex flex-col gap-3 text-blue-100">
-              <Link href="/">Home</Link>
-              <Link href="/books">All Books</Link>
-              <Link href="/login">Login</Link>
-              <Link href="/register">Register</Link>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="mb-4 font-bold text-amber-400">Contact</h3>
-
-            <p className="text-blue-100">Email: support@booknook.com</p>
-
-            <p className="mt-3 text-blue-100">Follow us on social media</p>
-
-            <div className="mt-4 flex gap-4 text-sm font-bold text-amber-300">
-              <span>Facebook</span>
-              <span>Instagram</span>
-              <span>X</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="mx-auto mt-12 max-w-7xl border-t border-blue-800 pt-6 text-center text-sm text-blue-300">
-          © {new Date().getFullYear()} BookNook. All rights reserved.
-        </div>
-      </footer>
+      {/* Shared Footer */}
+      <Footer />
     </main>
   );
 }
