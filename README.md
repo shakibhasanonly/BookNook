@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📚 BookNook — Online Library Management
 
-## Getting Started
+**Live Website:** https://book-nook-jet-ten.vercel.app/
 
-First, run the development server:
+BookNook is an online library management platform where users can explore books,
+add their own books, borrow books, and manage their borrowed collections.
+
+## ✨ Features
+
+- 🔐 **User Authentication:** Register and log in using email/password or
+  Google.
+- 📖 **Browse Books:** Explore all available books with details.
+- ➕ **Add Books:** Logged-in users can add new books to the library.
+- ✏️ **Manage Books:** Edit and delete books added by the logged-in user.
+- 📚 **Borrow Books:** Borrow available books and manage borrowing records.
+- 🔄 **Return Books:** Return borrowed books and update available copies.
+- 👤 **User Profile:** View profile information and manage your account.
+- 🏠 **Dynamic Homepage:** Explore new arrivals and featured sections.
+- 📱 **Responsive Design:** Enjoy the website on desktop, tablet, and mobile
+  devices.
+
+## 🛠️ Technologies Used
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- Better Auth
+- MongoDB
+- Express.js
+
+## 🚀 Run Locally
 
 ```bash
+git clone https://github.com/shakibhasanonly/BookNook.git
+cd BookNook/client
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 👨‍💻 Developer
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Developed as part of Programming Hero Assignment 8.
