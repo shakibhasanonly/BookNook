@@ -8,7 +8,9 @@ const mongoClient = new MongoClient(process.env.MONGODB_URI!);
 const database = mongoClient.db('booknook');
 
 export const auth = betterAuth({
-  baseURL: 'http://localhost:3000',
+  baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
+
+  secret: process.env.BETTER_AUTH_SECRET,
 
   database: mongodbAdapter(database, {
     client: mongoClient,
@@ -16,6 +18,15 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
+  },
+
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ['google'],
+      requireLocalEmailVerified: false,
+      updateUserInfoOnLink: true,
+    },
   },
 
   socialProviders: {
