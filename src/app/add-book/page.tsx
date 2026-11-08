@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import { authClient } from '@/lib/auth-client';
@@ -22,6 +22,12 @@ export default function AddBookPage() {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error' | ''>('');
 
+  useEffect(() => {
+    if (!isPending && !session?.user) {
+      router.replace('/login?callbackUrl=%2Fadd-book');
+    }
+  }, [isPending, session, router]);
+
   const addedDate = new Date().toISOString().split('T')[0];
 
   const handleChange = (
@@ -39,8 +45,7 @@ export default function AddBookPage() {
     e.preventDefault();
 
     if (!session?.user) {
-      setMessage('Please login first!');
-      setMessageType('error');
+      router.push('/login?callbackUrl=%2Fadd-book');
       return;
     }
 
@@ -94,12 +99,8 @@ export default function AddBookPage() {
     }
   };
 
-  if (isPending) {
+  if (isPending || !session?.user) {
     return <p className="p-10 text-center">Loading...</p>;
-  }
-
-  if (!session?.user) {
-    return <p className="p-10 text-center">Please login to add a book.</p>;
   }
 
   return (

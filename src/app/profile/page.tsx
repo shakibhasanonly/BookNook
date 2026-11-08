@@ -16,7 +16,7 @@ export default function ProfilePage() {
       toast.error('Please login to view your profile.', {
         position: 'top-center',
       });
-      router.replace('/login');
+      router.replace(`/login?callbackUrl=${encodeURIComponent('/profile')}`);
     }
   }, [isPending, session, router]);
 

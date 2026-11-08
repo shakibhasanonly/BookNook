@@ -48,10 +48,11 @@ export default function BookDetails() {
     if (isPending) return;
 
     if (!session?.user?.email) {
-      router.replace('/login');
-      return;
+      router.replace(
+        `/login?callbackUrl=${encodeURIComponent(`/books/${id}`)}`,
+      );
     }
-  }, [isPending, session, router]);
+  }, [isPending, session, router, id]);
 
   // Fetch Book Only After Authentication
   useEffect(() => {
@@ -94,7 +95,9 @@ export default function BookDetails() {
     if (isPending) return;
 
     if (!session?.user?.email) {
-      router.replace('/login');
+      router.replace(
+        `/login?callbackUrl=${encodeURIComponent(`/books/${id}`)}`,
+      );
       return;
     }
 
@@ -116,7 +119,6 @@ export default function BookDetails() {
     returnDate.setDate(returnDate.getDate() + 7);
 
     try {
-      // Get JWT token from Better Auth
       const { data, error } = await authClient.token();
 
       if (error || !data?.token) {

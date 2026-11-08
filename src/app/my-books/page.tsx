@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { authClient } from '@/lib/auth-client';
@@ -23,6 +24,7 @@ interface Toast {
 }
 
 export default function MyBooks() {
+  const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
 
   const [books, setBooks] = useState<Book[]>([]);
@@ -45,6 +47,12 @@ export default function MyBooks() {
   const [deleting, setDeleting] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
 
+  useEffect(() => {
+    if (!isPending && !session?.user) {
+      router.replace('/login?callbackUrl=%2Fmy-books');
+    }
+  }, [isPending, session, router]);
+
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
@@ -52,13 +60,7 @@ export default function MyBooks() {
 
   useEffect(() => {
     const fetchMyBooks = async () => {
-      if (isPending) return;
-
-      if (!session?.user?.email) {
-        setBooks([]);
-        setLoading(false);
-        return;
-      }
+      if (isPending || !session?.user?.email) return;
 
       try {
         const response = await fetch(
@@ -186,6 +188,14 @@ export default function MyBooks() {
     }
   };
 
+  if (isPending || !session?.user) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-white">
+        <p className="text-slate-500">Checking login...</p>
+      </main>
+    );
+  }
+
   return (
     <main className="flex min-h-screen flex-col bg-white text-slate-800">
       <Navbar />
@@ -221,20 +231,10 @@ export default function MyBooks() {
           </Link>
         </div>
 
-        {isPending || loading ? (
+        {loading ? (
           <p className="py-16 text-center text-slate-500">
             Loading your books...
           </p>
-        ) : !session?.user?.email ? (
-          <div className="rounded-xl border border-slate-200 py-16 text-center">
-            <p className="text-slate-600">Please login to view your books.</p>
-            <Link
-              href="/login"
-              className="mt-4 inline-block font-semibold text-emerald-700"
-            >
-              Login
-            </Link>
-          </div>
         ) : error ? (
           <p className="py-16 text-center text-red-500">{error}</p>
         ) : books.length === 0 ? (

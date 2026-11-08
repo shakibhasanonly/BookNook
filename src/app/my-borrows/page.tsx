@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { authClient } from '@/lib/auth-client';
@@ -22,6 +23,7 @@ interface Toast {
 }
 
 export default function MyBorrows() {
+  const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
 
   const [borrows, setBorrows] = useState<Borrow[]>([]);
@@ -29,6 +31,12 @@ export default function MyBorrows() {
   const [error, setError] = useState('');
   const [returningId, setReturningId] = useState<string | null>(null);
   const [toast, setToast] = useState<Toast | null>(null);
+
+  useEffect(() => {
+    if (!isPending && !session?.user) {
+      router.replace('/login?callbackUrl=%2Fmy-borrows');
+    }
+  }, [isPending, session, router]);
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
@@ -38,13 +46,7 @@ export default function MyBorrows() {
   // Fetch Borrowed Books
   useEffect(() => {
     const fetchBorrows = async () => {
-      if (isPending) return;
-
-      if (!session?.user?.email) {
-        setBorrows([]);
-        setLoading(false);
-        return;
-      }
+      if (isPending || !session?.user?.email) return;
 
       try {
         setLoading(true);
@@ -66,10 +68,6 @@ export default function MyBorrows() {
         );
 
         const result = await response.json();
-
-        // Debugging: Show actual backend response
-        console.log('BORROWS STATUS:', response.status);
-        console.log('BORROWS RESPONSE:', result);
 
         if (!response.ok) {
           throw new Error(result.message || 'Failed to load borrowed books');
@@ -151,11 +149,18 @@ export default function MyBorrows() {
     }
   };
 
+  if (isPending || !session?.user) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-white">
+        <p className="text-slate-500">Checking login...</p>
+      </main>
+    );
+  }
+
   return (
     <main className="flex min-h-screen flex-col bg-white text-slate-800">
       <Navbar />
 
-      {/* Toast Notification */}
       {toast && (
         <div
           role="status"
@@ -168,7 +173,6 @@ export default function MyBorrows() {
       )}
 
       <section className="mx-auto w-full max-w-6xl flex-1 px-4 py-12 sm:px-6">
-        {/* Page Heading */}
         <div className="mb-10">
           <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-emerald-700">
             Your Reading List
@@ -181,27 +185,11 @@ export default function MyBorrows() {
           </p>
         </div>
 
-        {/* Loading */}
-        {isPending || loading ? (
+        {loading ? (
           <p className="py-16 text-center text-slate-500">
             Loading borrowed books...
           </p>
-        ) : !session?.user?.email ? (
-          /* Not Logged In */
-          <div className="rounded-xl border border-slate-200 py-16 text-center">
-            <p className="text-slate-600">
-              Please login to view your borrowed books.
-            </p>
-
-            <Link
-              href="/login"
-              className="mt-4 inline-block font-semibold text-emerald-700"
-            >
-              Login
-            </Link>
-          </div>
         ) : error ? (
-          /* Error */
           <div className="rounded-xl border border-red-200 bg-red-50 py-16 text-center">
             <p className="text-red-600">{error}</p>
 
@@ -213,7 +201,6 @@ export default function MyBorrows() {
             </button>
           </div>
         ) : borrows.length === 0 ? (
-          /* Empty State */
           <div className="rounded-xl border border-slate-200 py-16 text-center">
             <h2 className="text-xl font-semibold">No borrowed books yet</h2>
 
@@ -229,18 +216,14 @@ export default function MyBorrows() {
             </Link>
           </div>
         ) : (
-          /* Borrowed Books Table */
           <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[750px] text-left">
                 <thead className="bg-slate-50 text-sm text-slate-600">
                   <tr>
                     <th className="px-6 py-4 font-semibold">Book</th>
-
                     <th className="px-6 py-4 font-semibold">Borrow Date</th>
-
                     <th className="px-6 py-4 font-semibold">Return Date</th>
-
                     <th className="px-6 py-4 text-right font-semibold">
                       Action
                     </th>

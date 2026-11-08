@@ -1,12 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const returnUrl = searchParams.get('callbackUrl') || '/';
+
+  const redirectUrl =
+    returnUrl.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : '/';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,7 +30,7 @@ export default function LoginPage() {
       const { error } = await authClient.signIn.email({
         email,
         password,
-        callbackURL: '/',
+        callbackURL: redirectUrl,
       });
 
       if (error) {
@@ -32,7 +38,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.push('/');
+      router.push(redirectUrl);
       router.refresh();
     } catch {
       setError('Something went wrong. Please try again.');
@@ -48,7 +54,7 @@ export default function LoginPage() {
     try {
       const { error } = await authClient.signIn.social({
         provider: 'google',
-        callbackURL: '/',
+        callbackURL: redirectUrl,
       });
 
       if (error) {
@@ -220,5 +226,19 @@ export default function LoginPage() {
         </p>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-slate-50">
+          <p className="font-semibold text-blue-950">Loading login page...</p>
+        </main>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }
